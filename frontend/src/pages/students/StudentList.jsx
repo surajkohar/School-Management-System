@@ -10,17 +10,9 @@ import 'jspdf-autotable';
 const StudentList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { 
-    students, 
-    loading, 
-    totalCount, 
-    currentPage, 
-    pageSize, 
-    searchQuery, 
-    sortField, 
-    sortOrder,
-    filters 
-  } = useSelector((state) => state.students);
+  const { students, loading, totalCount, currentPage, pageSize, searchQuery, sortField, sortOrder, filters } = useSelector(
+    state => state.students
+  );
 
   const [showFilters, setShowFilters] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -33,6 +25,7 @@ const StudentList = () => {
     dateTo: ''
   });
 
+  const auth = useSelector(state => state.auth);
   // Extended mock data with 50+ students for pagination testing
   const mockStudents = [
     {
@@ -117,27 +110,24 @@ const StudentList = () => {
   ];
 
   useEffect(() => {
+    console.log('Auth State:', auth);
+
     // Simulate API call with pagination
     setTimeout(() => {
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const paginatedStudents = mockStudents.slice(startIndex, endIndex);
-      
+
       dispatch(setStudents({ students: paginatedStudents, totalCount: mockStudents.length }));
     }, 500);
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage, pageSize, auth]);
 
   const columns = [
     {
       key: 'photo',
       title: 'Photo',
-      render: (value) => (
-        <img 
-          src={value} 
-          alt="Student" 
-          className="rounded-circle"
-          style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-        />
+      render: value => (
+        <img src={value} alt="Student" className="rounded-circle" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
       )
     },
     {
@@ -162,32 +152,23 @@ const StudentList = () => {
     },
     {
       key: 'phone',
-      title: 'Phone',
+      title: 'Phone'
     },
     {
       key: 'status',
       title: 'Status',
-      render: (value) => (
-        <span className={`badge bg-${value === 'Active' ? 'success' : 'secondary'}`}>
-          {value}
-        </span>
-      )
+      render: value => <span className={`badge bg-${value === 'Active' ? 'success' : 'secondary'}`}>{value}</span>
     },
     {
       key: 'feeStatus',
       title: 'Fee Status',
-      render: (value) => (
-        <span className={`badge bg-${
-          value === 'Paid' ? 'success' : 
-          value === 'Pending' ? 'warning' : 'danger'
-        }`}>
-          {value}
-        </span>
+      render: value => (
+        <span className={`badge bg-${value === 'Paid' ? 'success' : value === 'Pending' ? 'warning' : 'danger'}`}>{value}</span>
       )
     }
   ];
 
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     dispatch(setSearchQuery(e.target.value));
   };
 
@@ -195,19 +176,19 @@ const StudentList = () => {
     dispatch(setSorting({ field, order }));
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = page => {
     dispatch(setCurrentPage(page));
   };
 
-  const handleView = (student) => {
+  const handleView = student => {
     navigate(`/students/view/${student.id}`);
   };
 
-  const handleEdit = (student) => {
+  const handleEdit = student => {
     navigate(`/students/edit/${student.id}`);
   };
 
-  const handleDelete = (student) => {
+  const handleDelete = student => {
     console.log('Delete student:', student.id);
     // Remove from local state for demo
     const updatedStudents = students.filter(s => s.id !== student.id);
@@ -222,7 +203,7 @@ const StudentList = () => {
     }
   };
 
-  const handleSelectAll = (checked) => {
+  const handleSelectAll = checked => {
     if (checked) {
       setSelectedItems(students.map(student => student.id));
     } else {
@@ -230,9 +211,9 @@ const StudentList = () => {
     }
   };
 
-  const handleBulkAction = (action) => {
+  const handleBulkAction = action => {
     console.log(`Bulk ${action} for items:`, selectedItems);
-    
+
     if (action === 'delete') {
       if (window.confirm(`Are you sure you want to delete ${selectedItems.length} selected students?`)) {
         const updatedStudents = students.filter(s => !selectedItems.includes(s.id));
@@ -241,20 +222,16 @@ const StudentList = () => {
       }
     } else if (action === 'activate') {
       // Update status to active for selected items
-      const updatedStudents = students.map(s => 
-        selectedItems.includes(s.id) ? { ...s, status: 'Active' } : s
-      );
+      const updatedStudents = students.map(s => (selectedItems.includes(s.id) ? { ...s, status: 'Active' } : s));
       dispatch(setStudents({ students: updatedStudents, totalCount }));
       setSelectedItems([]);
     } else if (action === 'deactivate') {
       // Update status to inactive for selected items
-      const updatedStudents = students.map(s => 
-        selectedItems.includes(s.id) ? { ...s, status: 'Inactive' } : s
-      );
+      const updatedStudents = students.map(s => (selectedItems.includes(s.id) ? { ...s, status: 'Inactive' } : s));
       dispatch(setStudents({ students: updatedStudents, totalCount }));
       setSelectedItems([]);
     }
-    
+
     setShowBulkActions(false);
   };
 
@@ -276,15 +253,15 @@ const StudentList = () => {
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    
+
     // Add title
     doc.setFontSize(20);
     doc.text('Student List Report', 14, 22);
-    
+
     // Add date
     doc.setFontSize(12);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 32);
-    
+
     // Prepare table data
     const tableData = students.map(student => [
       student.rollNumber,
@@ -295,7 +272,7 @@ const StudentList = () => {
       student.status,
       student.feeStatus
     ]);
-    
+
     // Add table
     doc.autoTable({
       head: [['Roll No.', 'Name', 'Class', 'Phone', 'Email', 'Status', 'Fee Status']],
@@ -303,19 +280,19 @@ const StudentList = () => {
       startY: 40,
       styles: {
         fontSize: 8,
-        cellPadding: 2,
+        cellPadding: 2
       },
       headStyles: {
         fillColor: [0, 123, 255],
-        textColor: 255,
-      },
+        textColor: 255
+      }
     });
-    
+
     // Save the PDF
     doc.save('student-list.pdf');
   };
 
-  const handleExport = (format) => {
+  const handleExport = format => {
     if (format === 'pdf') {
       handleExportPDF();
     } else {
@@ -329,10 +306,7 @@ const StudentList = () => {
     <div className="student-list animate-slide-in">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="h3 fw-bold">Students Management</h1>
-        <button 
-          className="btn btn-primary btn-custom"
-          onClick={() => navigate('/students/add')}
-        >
+        <button className="btn btn-primary btn-custom" onClick={() => navigate('/students/add')}>
           <i className="bi bi-plus-circle me-2"></i>
           Add New Student
         </button>
@@ -348,33 +322,21 @@ const StudentList = () => {
                   {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''} selected
                 </span>
                 <div className="btn-group">
-                  <button 
-                    className="btn btn-success btn-sm"
-                    onClick={() => handleBulkAction('activate')}
-                  >
+                  <button className="btn btn-success btn-sm" onClick={() => handleBulkAction('activate')}>
                     <i className="bi bi-check-circle me-1"></i>
                     Activate
                   </button>
-                  <button 
-                    className="btn btn-warning btn-sm"
-                    onClick={() => handleBulkAction('deactivate')}
-                  >
+                  <button className="btn btn-warning btn-sm" onClick={() => handleBulkAction('deactivate')}>
                     <i className="bi bi-pause-circle me-1"></i>
                     Deactivate
                   </button>
-                  <button 
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleBulkAction('delete')}
-                  >
+                  <button className="btn btn-danger btn-sm" onClick={() => handleBulkAction('delete')}>
                     <i className="bi bi-trash me-1"></i>
                     Delete
                   </button>
                 </div>
               </div>
-              <button 
-                className="btn btn-outline-secondary btn-sm"
-                onClick={() => setSelectedItems([])}
-              >
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => setSelectedItems([])}>
                 <i className="bi bi-x"></i>
                 Clear Selection
               </button>
@@ -392,51 +354,42 @@ const StudentList = () => {
                 <span className="input-group-text">
                   <i className="bi bi-search"></i>
                 </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search students..."
-                  value={searchQuery}
-                  onChange={handleSearch}
-                />
+                <input type="text" className="form-control" placeholder="Search students..." value={searchQuery} onChange={handleSearch} />
               </div>
             </div>
-            
+
             <div className="col-md-8">
               <div className="d-flex gap-2 justify-content-end">
-                <button 
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowFilters(!showFilters)}
-                >
+                <button className="btn btn-outline-secondary" onClick={() => setShowFilters(!showFilters)}>
                   <i className="bi bi-funnel me-1"></i>
                   Filters
                 </button>
-                
+
                 <div className="dropdown">
-                  <button 
-                    className="btn btn-outline-success dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                  >
+                  <button className="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
                     <i className="bi bi-download me-1"></i>
                     Export
                   </button>
                   <ul className="dropdown-menu">
-                    <li><button className="dropdown-item" onClick={() => handleExport('pdf')}>
-                      <i className="bi bi-file-pdf me-2"></i>PDF
-                    </button></li>
-                    <li><button className="dropdown-item" onClick={() => handleExport('excel')}>
-                      <i className="bi bi-file-excel me-2"></i>Excel
-                    </button></li>
-                    <li><button className="dropdown-item" onClick={() => handleExport('csv')}>
-                      <i className="bi bi-file-csv me-2"></i>CSV
-                    </button></li>
+                    <li>
+                      <button className="dropdown-item" onClick={() => handleExport('pdf')}>
+                        <i className="bi bi-file-pdf me-2"></i>PDF
+                      </button>
+                    </li>
+                    <li>
+                      <button className="dropdown-item" onClick={() => handleExport('excel')}>
+                        <i className="bi bi-file-excel me-2"></i>Excel
+                      </button>
+                    </li>
+                    <li>
+                      <button className="dropdown-item" onClick={() => handleExport('csv')}>
+                        <i className="bi bi-file-csv me-2"></i>CSV
+                      </button>
+                    </li>
                   </ul>
                 </div>
-                
-                <button 
-                  className="btn btn-outline-info"
-                  onClick={() => window.print()}
-                >
+
+                <button className="btn btn-outline-info" onClick={() => window.print()}>
                   <i className="bi bi-printer me-1"></i>
                   Print
                 </button>
@@ -448,11 +401,10 @@ const StudentList = () => {
           {showFilters && (
             <div className="row g-3 mt-3 pt-3 border-top">
               <div className="col-md-2">
-                <select 
+                <select
                   className="form-select"
                   value={localFilters.class}
-                  onChange={(e) => setLocalFilters({...localFilters, class: e.target.value})}
-                >
+                  onChange={e => setLocalFilters({ ...localFilters, class: e.target.value })}>
                   <option value="">All Classes</option>
                   <option value="1">Class 1</option>
                   <option value="2">Class 2</option>
@@ -468,13 +420,12 @@ const StudentList = () => {
                   <option value="12">Class 12</option>
                 </select>
               </div>
-              
+
               <div className="col-md-2">
-                <select 
+                <select
                   className="form-select"
                   value={localFilters.section}
-                  onChange={(e) => setLocalFilters({...localFilters, section: e.target.value})}
-                >
+                  onChange={e => setLocalFilters({ ...localFilters, section: e.target.value })}>
                   <option value="">All Sections</option>
                   <option value="A">Section A</option>
                   <option value="B">Section B</option>
@@ -482,51 +433,44 @@ const StudentList = () => {
                   <option value="D">Section D</option>
                 </select>
               </div>
-              
+
               <div className="col-md-2">
-                <select 
+                <select
                   className="form-select"
                   value={localFilters.status}
-                  onChange={(e) => setLocalFilters({...localFilters, status: e.target.value})}
-                >
+                  onChange={e => setLocalFilters({ ...localFilters, status: e.target.value })}>
                   <option value="">All Status</option>
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
-              
+
               <div className="col-md-2">
-                <input 
+                <input
                   type="date"
                   className="form-control"
                   placeholder="From Date"
                   value={localFilters.dateFrom}
-                  onChange={(e) => setLocalFilters({...localFilters, dateFrom: e.target.value})}
+                  onChange={e => setLocalFilters({ ...localFilters, dateFrom: e.target.value })}
                 />
               </div>
-              
+
               <div className="col-md-2">
-                <input 
+                <input
                   type="date"
                   className="form-control"
                   placeholder="To Date"
                   value={localFilters.dateTo}
-                  onChange={(e) => setLocalFilters({...localFilters, dateTo: e.target.value})}
+                  onChange={e => setLocalFilters({ ...localFilters, dateTo: e.target.value })}
                 />
               </div>
-              
+
               <div className="col-md-2">
                 <div className="d-flex gap-2">
-                  <button 
-                    className="btn btn-primary btn-sm"
-                    onClick={handleApplyFilters}
-                  >
+                  <button className="btn btn-primary btn-sm" onClick={handleApplyFilters}>
                     Apply
                   </button>
-                  <button 
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={handleClearFilters}
-                  >
+                  <button className="btn btn-outline-secondary btn-sm" onClick={handleClearFilters}>
                     Clear
                   </button>
                 </div>

@@ -10,21 +10,11 @@ const userController = new UserController();
 router.get('/profile', authenticate, userController.getProfile);
 
 // Admin only
-router.get(
-  '/all',
-  authenticate,
-  requireRole('admin'),
-  userController.getAllUsers
-);
+router.get('/all', authenticate, requireRole('admin'), userController.getAllUsers);
 
 // Teacher/Admin can access students
-router.get(
-  '/students',
-  authenticate,
-  authorize('students', 'read'),
-  (req, res) => {
-    res.json({ message: 'Students list' });
-  }
-);
+router.get('/students', authenticate, authorize('students', 'read'), (req, res) => {
+  res.json({ message: 'Students list' });
+});
 
 export default router;

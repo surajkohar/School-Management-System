@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { RoleRepository } from '../database/repositories/roleRepository';
+import { RBACService } from '../services/rbacService';
 import { ForbiddenError } from '../shared/errors/AppError';
 
-const roleRepo = new RoleRepository();
+const rbacService = new RBACService();
 
 export const authorize = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -11,31 +11,18 @@ export const authorize = (resource: string, action: string) => {
         throw new ForbiddenError('Authentication required');
       }
 
-      // ← SUPER ADMIN BYPASS - No permission check needed
+      // Super Admin bypass - no permission check needed
       if (req.user.isSuperAdmin) {
         return next();
       }
 
-      // Admin role also has full access (optional, remove if not needed)
-      if (req.user.role === 'admin') {
-        return next();
-      }
-
-      // Get role with permissions
-      const role = await roleRepo.findByName(req.user.role);
-      if (!role || !role.isActive) {
-        throw new ForbiddenError('Role not found or inactive');
-      }
-
-      // Check if role has the required permission
-      const hasPermission = role.permissions.some(rp => {
-        const perm = rp.permission as any;
-        return (
-          perm.resource === resource ||
-          perm.resource === '*' ||
-          (perm.resource === resource && (perm.action === action || perm.action === '*'))
-        );
-      });
+      // Check permission
+      const hasPermission = await rbacService.checkPermission(
+        req.user.role,
+        req.user.isSuperAdmin, // Pass isSuperAdmin flag
+        resource,
+        action
+      );
 
       if (!hasPermission) {
         throw new ForbiddenError(`Insufficient permissions: ${resource}.${action}`);
@@ -56,21 +43,14 @@ export const requirePermission = (permissionName: string) => {
         throw new ForbiddenError('Authentication required');
       }
 
-      // ← SUPER ADMIN BYPASS
+      // Super Admin bypass
       if (req.user.isSuperAdmin) {
         return next();
       }
 
-      const role = await roleRepo.findByName(req.user.role);
-      if (!role) {
-        throw new ForbiddenError('Role not found');
-      }
+      const permissions = await rbacService.getRolePermissions(req.user.role, false);
 
-      const hasPermission = role.permissions.some(rp => {
-        const perm = rp.permission as any;
-        return perm.name === permissionName;
-      });
-
+      const hasPermission = permissions.some((p: any) => p.name === permissionName);
       if (!hasPermission) {
         throw new ForbiddenError(`Permission required: ${permissionName}`);
       }
@@ -89,7 +69,7 @@ export const requireRole = (...roles: string[]) => {
       throw new ForbiddenError('Authentication required');
     }
 
-    // ← SUPER ADMIN BYPASS
+    // Super Admin bypass
     if (req.user.isSuperAdmin) {
       return next();
     }

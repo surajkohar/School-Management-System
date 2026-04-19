@@ -1,40 +1,33 @@
-// models/Role.ts - FIXED
-import mongoose, { Schema } from 'mongoose';
-import { IRoleDocument } from '../interfaces/IRole';
+import mongoose, { Document, Schema } from 'mongoose';
+import { IRole } from '../interfaces/IRole';
 
-const RolePermissionSchema = new Schema(
-  {
-    permission: {
-      type: Schema.Types.ObjectId,
-      ref: 'Permission',
-      required: true
-    },
-    conditions: { type: Schema.Types.Mixed, default: null }
-  },
-  { _id: false }
-);
+export interface IRoleDocument extends IRole, Document {}
 
 const RoleSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
+      unique: true,
       lowercase: true
     },
-    description: { type: String, required: true },
-    permissions: [RolePermissionSchema],
-    isDefault: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true }
+    description: {
+      type: String,
+      required: true
+    },
+    isDefault: {
+      type: Boolean,
+      default: false
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    }
   },
   {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    timestamps: true
   }
 );
-
-// Keep only this index
-RoleSchema.index({ name: 1 }, { unique: true }); // ← Define here only
 
 // Ensure only one default role
 RoleSchema.pre('save', async function (next) {
@@ -43,5 +36,7 @@ RoleSchema.pre('save', async function (next) {
   }
   next();
 });
+
+RoleSchema.index({ name: 1 }, { unique: true });
 
 export const RoleModel = mongoose.model<IRoleDocument>('Role', RoleSchema);

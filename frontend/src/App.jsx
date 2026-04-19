@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -33,56 +34,255 @@ import Calendar from './pages/calendar/Calendar.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 function App() {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector(state => state.auth);
 
   return (
     <div className="App">
       <Routes>
-        <Route 
-          path="/login" 
-          element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} 
-        />
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        {/* Public Route */}
+        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} />
+
+        {/* Protected Layout */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
-          
-          {/* Student Routes */}
-          <Route path="students" element={<StudentList />} />
-          <Route path="students/add" element={<StudentAdd />} />
-          <Route path="students/edit/:id" element={<StudentEdit />} />
-          <Route path="students/view/:id" element={<StudentView />} />
-          <Route path="students/promotion" element={<StudentPromotion />} />
-          <Route path="students/historical-data" element={<StudentHistoricalData />} />
-          
-          {/* Employee Routes */}
-          <Route path="employees" element={<EmployeeList />} />
-          <Route path="employees/add" element={<EmployeeAdd />} />
-          <Route path="employees/edit/:id" element={<EmployeeEdit />} />
-          <Route path="employees/view/:id" element={<EmployeeView />} />
-          <Route path="employees/payroll" element={<EmployeePayroll />} />
-          <Route path="employees/leave" element={<EmployeeLeave />} />
-          
-          {/* Fee Routes */}
-          <Route path="fees" element={<FeeList />} />
-          <Route path="fees/collection" element={<FeeCollection />} />
-          <Route path="fees/structure" element={<FeeStructure />} />
-          <Route path="fees/reports" element={<FeeReports />} />
-          
-          {/* Transport Routes */}
-          <Route path="transport/routes" element={<RouteList />} />
-          <Route path="transport/vehicles" element={<VehicleList />} />
-          <Route path="transport/drivers" element={<DriverList />} />
-          <Route path="transport/students" element={<StudentTransport />} />
-          
-          {/* Other Routes */}
-          <Route path="exams" element={<ExamList />} />
-          <Route path="reports" element={<ReportList />} />
-          <Route path="announcements" element={<AnnouncementList />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="settings/roles" element={<RolePermissions />} />
-          <Route path="calendar" element={<Calendar />} />
+
+          {/* Student Routes - Protected by 'student' resource permission */}
+          <Route
+            path="students"
+            element={
+              <ProtectedRoute requiredResource="student" requiredAction="read">
+                <StudentList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="students/add"
+            element={
+              <ProtectedRoute requiredResource="student" requiredAction="create">
+                <StudentAdd />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="students/edit/:id"
+            element={
+              <ProtectedRoute requiredResource="student" requiredAction="update">
+                <StudentEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="students/view/:id"
+            element={
+              <ProtectedRoute requiredResource="student" requiredAction="read">
+                <StudentView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="students/promotion"
+            element={
+              <ProtectedRoute requiredResource="student" requiredAction="update">
+                <StudentPromotion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="students/historical-data"
+            element={
+              <ProtectedRoute requiredResource="student" requiredAction="read">
+                <StudentHistoricalData />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Employee Routes - Protected by 'employee' resource permission */}
+          <Route
+            path="employees"
+            element={
+              <ProtectedRoute requiredResource="employee" requiredAction="read">
+                <EmployeeList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="employees/add"
+            element={
+              <ProtectedRoute requiredResource="employee" requiredAction="create">
+                <EmployeeAdd />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="employees/edit/:id"
+            element={
+              <ProtectedRoute requiredResource="employee" requiredAction="update">
+                <EmployeeEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="employees/view/:id"
+            element={
+              <ProtectedRoute requiredResource="employee" requiredAction="read">
+                <EmployeeView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="employees/payroll"
+            element={
+              <ProtectedRoute requiredResource="payroll" requiredAction="read">
+                <EmployeePayroll />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="employees/leave"
+            element={
+              <ProtectedRoute requiredResource="leave" requiredAction="read">
+                <EmployeeLeave />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fee Routes - Protected by 'fee' resource permission */}
+          <Route
+            path="fees"
+            element={
+              <ProtectedRoute requiredResource="fee" requiredAction="read">
+                <FeeList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="fees/collection"
+            element={
+              <ProtectedRoute requiredResource="fee" requiredAction="create">
+                <FeeCollection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="fees/structure"
+            element={
+              <ProtectedRoute requiredResource="fee" requiredAction="manage">
+                <FeeStructure />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="fees/reports"
+            element={
+              <ProtectedRoute requiredResource="report" requiredAction="read">
+                <FeeReports />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Transport Routes - Protected by 'transport' resource permission */}
+          <Route
+            path="transport/routes"
+            element={
+              <ProtectedRoute requiredResource="transport" requiredAction="read">
+                <RouteList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="transport/vehicles"
+            element={
+              <ProtectedRoute requiredResource="transport" requiredAction="read">
+                <VehicleList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="transport/drivers"
+            element={
+              <ProtectedRoute requiredResource="transport" requiredAction="read">
+                <DriverList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="transport/students"
+            element={
+              <ProtectedRoute requiredResource="transport" requiredAction="read">
+                <StudentTransport />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Exam Routes - Protected by 'exam' resource permission */}
+          <Route
+            path="exams"
+            element={
+              <ProtectedRoute requiredResource="exam" requiredAction="read">
+                <ExamList />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Report Routes - Protected by 'report' resource permission */}
+          <Route
+            path="reports"
+            element={
+              <ProtectedRoute requiredResource="report" requiredAction="read">
+                <ReportList />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Announcement Routes - Protected by 'announcement' resource permission */}
+          <Route
+            path="announcements"
+            element={
+              <ProtectedRoute requiredResource="announcement" requiredAction="read">
+                <AnnouncementList />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Settings - Protected by 'setting' resource permission */}
+          <Route
+            path="settings"
+            element={
+              <ProtectedRoute requiredResource="setting" requiredAction="manage">
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Role Permissions - Admin only or super admin */}
+          <Route
+            path="settings/roles"
+            element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <RolePermissions />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Calendar - Protected by 'calendar' resource permission */}
+          <Route
+            path="calendar"
+            element={
+              <ProtectedRoute requiredResource="calendar" requiredAction="read">
+                <Calendar />
+              </ProtectedRoute>
+            }
+          />
         </Route>
-        
+
+        {/* Catch all */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </div>

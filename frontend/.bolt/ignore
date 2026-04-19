@@ -1,5 +1,0 @@
-# Ignore library, attendance, and academic system files to reduce project size
-src/pages/library/
-src/pages/attendance/
-src/pages/academic/
-src/pages/employees/

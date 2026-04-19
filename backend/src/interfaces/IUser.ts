@@ -13,7 +13,7 @@ export interface IUser {
   firstName: string;
   lastName: string;
   role: string | IRole;
-  isSuperAdmin: boolean; 
+  isSuperAdmin: boolean;
   status: UserStatus;
   isEmailVerified: boolean;
   lastLoginAt?: Date;
@@ -29,5 +29,7 @@ export interface IUserInput {
   firstName: string;
   lastName: string;
   role?: string;
-  isSuperAdmin?: boolean;       // ← NEW FIELD
+  status: string;
+  isSuperAdmin?: boolean;
+  isEmailVerified?: boolean;
 }
