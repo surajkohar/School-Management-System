@@ -15,6 +15,8 @@ export interface IUser {
   role: string | IRole;
   isSuperAdmin: boolean;
   status: UserStatus;
+  image: string;
+  phone:string;
   isEmailVerified: boolean;
   lastLoginAt?: Date;
   createdAt?: Date;
@@ -30,6 +32,8 @@ export interface IUserInput {
   lastName: string;
   role?: string;
   status: string;
+  image?: string;
+  phone?: string,
   isSuperAdmin?: boolean;
   isEmailVerified?: boolean;
 }

@@ -10,10 +10,14 @@ export class UserRepository {
     return UserModel.findOne({ email: email.toLowerCase() });
   }
 
+  async findAll(): Promise<IUserDocument[]> {
+    return UserModel.find();
+  }
+
   async create(userData: IUserInput & { password: string; role: string }): Promise<IUserDocument> {
     return UserModel.create({
       ...userData,
-      isSuperAdmin: userData.isSuperAdmin || false // ← DEFAULT FALSE
+      isSuperAdmin: userData.isSuperAdmin || false
     });
   }
 
@@ -31,7 +35,6 @@ export class UserRepository {
     return count > 0;
   }
 
-  // ← NEW: Find super admin
   async findSuperAdmins(): Promise<IUserDocument[]> {
     return UserModel.find({ isSuperAdmin: true });
   }

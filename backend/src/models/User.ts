@@ -16,6 +16,8 @@ const UserSchema = new Schema(
     password: { type: String, required: true },
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
+    image: { type: String, default: '' },
+    phone: { type: String, default: '' },
     role: {
       type: Schema.Types.ObjectId,
       ref: 'Role',

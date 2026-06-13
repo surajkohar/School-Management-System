@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { UserController } from '../controllers/userController';
 import { authenticate } from '../middleware/auth';
 import { authorize, requireRole } from '../middleware/rbac';
+import { upload } from '../config/multer';
 
 const router = Router();
 const userController = new UserController();
@@ -16,5 +17,7 @@ router.get('/all', authenticate, requireRole('admin'), userController.getAllUser
 router.get('/students', authenticate, authorize('students', 'read'), (req, res) => {
   res.json({ message: 'Students list' });
 });
+
+router.post('/profile', authenticate, upload.single('profileImage'), userController.updateProfile);
 
 export default router;
